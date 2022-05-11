@@ -11,8 +11,19 @@ class Play extends Phaser.Scene {
 
     create() {
 
+        let hpConfig = {
+            fontFamily: 'Impact',
+            fontSize: '20px',
+            color: '#8B0000',
+            padding: {
+                top: 5,
+                bottom: 5,
+            },
+            fixedWidth: 0
+        }
+
         // place enemy slime
-        this.slime = this.add.sprite(game.config.width / 2, game.config.height / 2, "slime");
+        this.slime = this.add.sprite(game.config.width / 2, game.config.height / 2, "slime").setOrigin(0.0);
 
         // slime anim
         this.anims.create({
@@ -21,17 +32,36 @@ class Play extends Phaser.Scene {
             frameRate: 8,
             repeat: -1
         });
-
         this.slime.setScale(1.5);
         this.slime.anims.play("idle");
 
-        // place card
-        this.card = this.add.sprite(game.config.width / 2, game.config.height - 23, "card");
+        // slime hp
+        this.slime.hp = 20;
+        this.hpBar = this.add.text(this.slime.x + 55, this.slime.y - 20, this.slime.hp, hpConfig).setOrigin(0.0);
+        this.hpBar.gone = false;
 
+        // place card
+        this.card = this.add.sprite(game.config.width / 2, game.config.height - 23, "card").setInteractive();
+        this.card.damage = 5;
         this.card.setScale(1.5);
+
+        this.card.on("pointerdown", () => {
+            this.slime.hp -= this.card.damage;
+        });
     }
 
     update() {
-        
+
+        // update the text
+        if (this.hpBar.txt != this.slime.hp && !(this.hpBar.gone)) {
+            this.hpBar.text = this.slime.hp;
+            if (this.slime.hp <= 0) {
+                this.slime.destroy();
+                this.hpBar.gone = true;
+                this.time.delayedCall(500, () => {
+                    this.hpBar.destroy();
+                }, null, this);
+            }
+        }
     }
 }
