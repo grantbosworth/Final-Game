@@ -14,6 +14,7 @@ let config = {
 }
 
 let game = new Phaser.Game(config);
+let yourTurn = true;
 
 // reserve keyboard variables
 let keyRIGHT;

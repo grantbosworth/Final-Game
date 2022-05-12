@@ -6,6 +6,7 @@ class Play extends Phaser.Scene {
     preload() {
         // load assets here
         this.load.spritesheet("slime", "./assets/slime.png", {frameWidth: 32, frameHeight: 32, startFrame: 0, endFrame: 1});
+        this.load.spritesheet("Knight", "./assets/Knight.png", {frameWidth: 160, frameHeight: 160, startFrame: 0, endFrame: 1});
         this.load.image("card", "./assets/card.png");
     }
 
@@ -25,6 +26,9 @@ class Play extends Phaser.Scene {
         // place enemy slime
         this.slime = this.add.sprite(game.config.width / 2, game.config.height / 2, "slime").setOrigin(0.0);
 
+        // place Player
+        this.player = this.add.sprite(game.config.width / 10, game.config.height / 2, "Knight").setOrigin(0.0);
+
         // slime anim
         this.anims.create({
             key: "idle",
@@ -35,9 +39,24 @@ class Play extends Phaser.Scene {
         this.slime.setScale(1.5);
         this.slime.anims.play("idle");
 
+        // Player anim
+        this.anims.create({
+            key: "idle1",
+            frames: this.anims.generateFrameNumbers("Knight", {start: 0, end: 1}),
+            frameRate: 8,
+            repeat: -1
+        });
+        this.player.setScale(.5);
+        this.player.anims.play("idle1");
+
         // slime hp
         this.slime.hp = 20;
-        this.hpBar = this.add.text(this.slime.x + 55, this.slime.y - 20, this.slime.hp, hpConfig).setOrigin(0.0);
+        this.EnemyHPbar = this.add.text(this.slime.x + 55, this.slime.y - 20, this.slime.hp, hpConfig).setOrigin(0.0);
+        this.EnemyHPbar.gone = false;
+
+        // Player hp
+        this.player.hp = 100;
+        this.hpBar = this.add.text(this.player.x + 55, this.player.y - 20, this.player.hp, hpConfig).setOrigin(0.0);
         this.hpBar.gone = false;
 
         // place card
@@ -45,23 +64,53 @@ class Play extends Phaser.Scene {
         this.card.damage = 5;
         this.card.setScale(1.5);
 
-        this.card.on("pointerdown", () => {
-            this.slime.hp -= this.card.damage;
-        });
+        if(yourTurn) {
+            this.card.on("pointerdown", () => {
+                this.slime.hp -= this.card.damage;
+                yourTurn = false;
+            });
+        }
+    }
+
+    PlayerTurn() {
+
+    }
+
+    EnemyTurn() {
+        yourTurn = true;
+        this.time.delayedCall(1000, () => {
+            this.player.hp -= 10;
+        }, null, this);
     }
 
     update() {
-
         // update the text
-        if (this.hpBar.txt != this.slime.hp && !(this.hpBar.gone)) {
-            this.hpBar.text = this.slime.hp;
-            if (this.slime.hp <= 0) {
-                this.slime.destroy();
+        if (this.hpBar.txt != this.player.hp && !(this.hpBar.gone)) {
+            this.hpBar.text = this.player.hp;
+            if (this.player.hp <= 0) {
+                this.player.destroy();
                 this.hpBar.gone = true;
                 this.time.delayedCall(500, () => {
                     this.hpBar.destroy();
                 }, null, this);
             }
+        }
+        // update the text
+        if (this.EnemyHPbar.txt != this.slime.hp && !(this.EnemyHPbar.gone)) {
+            this.EnemyHPbar.text = this.slime.hp;
+            if (this.slime.hp <= 0) {
+                this.slime.destroy();
+                this.EnemyHPbar.gone = true;
+                this.time.delayedCall(500, () => {
+                    this.hpBar.destroy();
+                }, null, this);
+            }
+        }
+        if(yourTurn) {
+            this.PlayerTurn();
+        } else {
+            this.EnemyTurn();
+
         }
     }
 }
