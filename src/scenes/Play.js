@@ -110,7 +110,7 @@ class Play extends Phaser.Scene {
                 this.slime.destroy();
                 this.EnemyHPbar.gone = true;
                 this.time.delayedCall(500, () => {
-                    this.hpBar.destroy();
+                    this.EnemyHPbar.destroy();
                 }, null, this);
             }
         }
