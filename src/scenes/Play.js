@@ -8,6 +8,10 @@ class Play extends Phaser.Scene {
         this.load.spritesheet("slime", "./assets/slime.png", {frameWidth: 32, frameHeight: 32, startFrame: 0, endFrame: 1});
         this.load.spritesheet("Knight", "./assets/Knight.png", {frameWidth: 160, frameHeight: 160, startFrame: 0, endFrame: 1});
         this.load.image("card", "./assets/card.png");
+
+        // audio
+        this.load.audio("hurt", "./assets/hurt.wav");
+        this.load.audio("killed", "./assets/killed.wav");
     }
 
     create() {
@@ -64,18 +68,20 @@ class Play extends Phaser.Scene {
         this.card.damage = 5;
         this.card.setScale(1.5);
 
+        // Card Selection
         if(yourTurn) {
             this.card.on("pointerdown", () => {
                 this.slime.hp -= this.card.damage;
                 yourTurn = false;
+                this.sound.play("hurt");
             });
         }
     }
-
+    // Player Turn
     PlayerTurn() {
 
     }
-
+    // Enemy Turn
     EnemyTurn() {
         yourTurn = true;
         this.time.delayedCall(1000, () => {
@@ -99,6 +105,8 @@ class Play extends Phaser.Scene {
         if (this.EnemyHPbar.txt != this.slime.hp && !(this.EnemyHPbar.gone)) {
             this.EnemyHPbar.text = this.slime.hp;
             if (this.slime.hp <= 0) {
+                // kill the enemy
+                this.sound.play("killed");
                 this.slime.destroy();
                 this.EnemyHPbar.gone = true;
                 this.time.delayedCall(500, () => {
